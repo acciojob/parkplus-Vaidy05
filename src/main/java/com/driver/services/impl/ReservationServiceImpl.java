@@ -25,61 +25,71 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public Reservation reserveSpot(Integer userId, Integer parkingLotId, Integer timeInHours, Integer numberOfWheels) throws Exception {
 
-        User user = new User();
-        ParkingLot parkingLot = new ParkingLot();
+        try {
+            User user = new User();
+            ParkingLot parkingLot = new ParkingLot();
 
-        if(parkingLotRepository3.existsById(parkingLotId) && userRepository3.existsById(userId)) {
-            user = userRepository3.findById(userId).get();
-            parkingLot = parkingLotRepository3.findById(parkingLotId).get();
-        }
-        else
-            throw new NullPointerException();
+            if (parkingLotRepository3.existsById(parkingLotId) && userRepository3.existsById(userId)) {
+                user = userRepository3.findById(userId).get();
+                parkingLot = parkingLotRepository3.findById(parkingLotId).get();
+            } else
+                throw new Exception("Cannot make reservation");
 
-        List<Spot> spotList = parkingLot.getSpotList();
+            List<Spot> spotList = parkingLot.getSpotList();
 
-        SpotType spotType = SpotType.OTHERS;
+            SpotType spotType = SpotType.OTHERS;
 
-        if(numberOfWheels<=2)
-            spotType = SpotType.TWO_WHEELER;
-        else if(numberOfWheels<=4)
-            spotType = SpotType.FOUR_WHEELER;
+            if (numberOfWheels <= 2)
+                spotType = SpotType.TWO_WHEELER;
+            else if (numberOfWheels <= 4)
+                spotType = SpotType.FOUR_WHEELER;
 
-        int minPrice = Integer.MAX_VALUE;
-        Spot minPriceSpot = new Spot();
+            int minPrice = Integer.MAX_VALUE;
+            Spot minPriceSpot = null;
 
-        if(spotList!=null){
-            for(Spot spot : spotList){
-                if(spot.getSpotType().equals(spotType) && minPrice>spot.getPricePerHour()){
-                    minPriceSpot = spot;
-                    minPrice = spot.getPricePerHour();
+            if (spotList != null) {
+                for (Spot spot : spotList) {
+                    if (spot.getSpotType().equals(spotType) && minPrice > spot.getPricePerHour() && spot.getOccupied()==false) {
+                        minPriceSpot = spot;
+                        minPrice = spot.getPricePerHour();
+                    }
                 }
             }
+
+            if (minPriceSpot==null)
+                throw new Exception("Cannot make reservation");
+
+            Reservation reservation = new Reservation(timeInHours);
+            reservation.setSpot(minPriceSpot);
+            reservation.setUser(user);
+
+            List<Reservation> reservationList = new ArrayList<>();
+
+            if (user.getReservationList() != null)
+                reservationList = user.getReservationList();
+
+            reservationList.add(reservation);
+
+            user.setReservationList(reservationList);
+
+            List<Reservation> SpotReservationList = new ArrayList<>();
+
+            if (minPriceSpot.getReservationList() != null)
+                SpotReservationList = minPriceSpot.getReservationList();
+
+            SpotReservationList.add(reservation);
+
+            minPriceSpot.setReservationList(SpotReservationList);
+            minPriceSpot.setOccupied(true);
+
+            userRepository3.save(user);
+            spotRepository3.save(minPriceSpot);
+
+            return reservation;
         }
-
-        if(minPrice==Integer.MAX_VALUE)
-            throw new NullPointerException();
-
-        Reservation reservation = new Reservation(timeInHours,user,minPriceSpot);
-
-        List<Reservation> reservationList = new ArrayList<>();
-
-        if(user.getReservationList()!=null)
-            reservationList = user.getReservationList();
-
-        reservationList.add(reservation);
-
-        user.setReservationList(reservationList);
-
-        List<Reservation> SpotReservationList = new ArrayList<>();
-
-        if(minPriceSpot.getReservationList()!=null)
-            SpotReservationList = minPriceSpot.getReservationList();
-
-        SpotReservationList.add(reservation);
-
-        userRepository3.save(user);
-        spotRepository3.save(minPriceSpot);
-
-        return reservation;
+        catch (Exception e){
+            return null;
+        }
     }
+
 }
