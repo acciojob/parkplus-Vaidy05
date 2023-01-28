@@ -1,6 +1,7 @@
 package com.driver.model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Table
@@ -45,6 +46,7 @@ public class Spot {
         this.spotType = spotType;
         this.pricePerHour = pricePerHour;
         this.occupied = occupied;
+        this.reservationList = new ArrayList<>();
     }
 
     public Spot() {

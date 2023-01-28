@@ -3,6 +3,7 @@ package com.driver.model;
 import net.bytebuddy.agent.builder.AgentBuilder;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Table
@@ -41,6 +42,7 @@ public class User {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.password = password;
+        this.reservationList = new ArrayList<>();
     }
 
     public User() {
