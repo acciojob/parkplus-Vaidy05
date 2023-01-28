@@ -26,15 +26,13 @@ public class ReservationServiceImpl implements ReservationService {
     public Reservation reserveSpot(Integer userId, Integer parkingLotId, Integer timeInHours, Integer numberOfWheels) throws Exception {
 
         try {
-            User user = new User();
-            ParkingLot parkingLot = new ParkingLot();
 
-            if (parkingLotRepository3.existsById(parkingLotId) && userRepository3.existsById(userId)) {
-                user = userRepository3.findById(userId).get();
-                parkingLot = parkingLotRepository3.findById(parkingLotId).get();
-            }
-            else
-                throw new Exception("Cannot make reservation");
+               User user = userRepository3.findById(userId).get();
+               ParkingLot parkingLot = parkingLotRepository3.findById(parkingLotId).get();
+
+               if(user==null || parkingLot==null) {
+                   throw new Exception("Cannot make reservation");
+               }
 
             List<Spot> spotList = parkingLot.getSpotList();
 
@@ -64,19 +62,19 @@ public class ReservationServiceImpl implements ReservationService {
             reservation.setSpot(minPriceSpot);
             reservation.setUser(user);
 
-            List<Reservation> reservationList = new ArrayList<>();
+            List<Reservation> reservationList = user.getReservationList();
 
-            if (user.getReservationList() != null)
-                reservationList = user.getReservationList();
+            if (reservationList==null)
+                reservationList = new ArrayList<>();
 
             reservationList.add(reservation);
 
             user.setReservationList(reservationList);
 
-            List<Reservation> SpotReservationList = new ArrayList<>();
+            List<Reservation> SpotReservationList = minPriceSpot.getReservationList();
 
-            if(minPriceSpot.getReservationList() != null)
-                SpotReservationList = minPriceSpot.getReservationList();
+            if(SpotReservationList==null)
+                SpotReservationList = new ArrayList<>();
 
             SpotReservationList.add(reservation);
 
