@@ -32,7 +32,8 @@ public class ReservationServiceImpl implements ReservationService {
             if (parkingLotRepository3.existsById(parkingLotId) && userRepository3.existsById(userId)) {
                 user = userRepository3.findById(userId).get();
                 parkingLot = parkingLotRepository3.findById(parkingLotId).get();
-            } else
+            }
+            else
                 throw new Exception("Cannot make reservation");
 
             List<Spot> spotList = parkingLot.getSpotList();
@@ -74,7 +75,7 @@ public class ReservationServiceImpl implements ReservationService {
 
             List<Reservation> SpotReservationList = new ArrayList<>();
 
-            if (minPriceSpot.getReservationList() != null)
+            if(minPriceSpot.getReservationList() != null)
                 SpotReservationList = minPriceSpot.getReservationList();
 
             SpotReservationList.add(reservation);
