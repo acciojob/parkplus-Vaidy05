@@ -25,11 +25,15 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public Reservation reserveSpot(Integer userId, Integer parkingLotId, Integer timeInHours, Integer numberOfWheels) throws Exception {
 
-        User user = userRepository3.findById(userId).get();
-        ParkingLot parkingLot = parkingLotRepository3.findById(parkingLotId).get();
+        User user = new User();
+        ParkingLot parkingLot = new ParkingLot();
 
-        if(user==null || parkingLot==null)
-            throw new Exception("Cannot make reservation");
+        if(parkingLotRepository3.existsById(parkingLotId) && userRepository3.existsById(userId)) {
+            user = userRepository3.findById(userId).get();
+            parkingLot = parkingLotRepository3.findById(parkingLotId).get();
+        }
+        else
+            throw new NullPointerException();
 
         List<Spot> spotList = parkingLot.getSpotList();
 
@@ -53,23 +57,23 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         if(minPrice==Integer.MAX_VALUE)
-            throw new Exception("Cannot make reservation");
+            throw new NullPointerException();
 
         Reservation reservation = new Reservation(timeInHours,user,minPriceSpot);
 
-        List<Reservation> reservationList = user.getReservationList();
+        List<Reservation> reservationList = new ArrayList<>();
 
-        if(reservationList==null)
-            reservationList = new ArrayList<>();
+        if(user.getReservationList()!=null)
+            reservationList = user.getReservationList();
 
         reservationList.add(reservation);
 
         user.setReservationList(reservationList);
 
-        List<Reservation> SpotReservationList = minPriceSpot.getReservationList();
+        List<Reservation> SpotReservationList = new ArrayList<>();
 
-        if(SpotReservationList==null)
-            SpotReservationList = new ArrayList<>();
+        if(minPriceSpot.getReservationList()!=null)
+            SpotReservationList = minPriceSpot.getReservationList();
 
         SpotReservationList.add(reservation);
 
